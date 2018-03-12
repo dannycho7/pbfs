@@ -8,10 +8,10 @@ public:
 	Graph(int V);
 	void addEdge(int v, int w);
 	void BFS(int s);
-	
+
 private:
 	std::list<int> *adj;
 	int V;
 };
 
-#endif
+#endif // GRAPH_H
