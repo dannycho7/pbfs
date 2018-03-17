@@ -1,16 +1,18 @@
 #include <iostream>
 #include <cstring>
 #include <queue>
+#include <algorithm>
+#include <cilk/cilk.h>
 #include "graph.h"
 
 Graph::Graph(int V) {
 	this->V = V;
-	adj = new std::list<int>[this->V];
+	this->adj = new std::list<int>[this->V];
 }
 
 void Graph::addEdge(int v, int w) {
-	adj[v].push_back(w);
-	adj[w].push_back(v);
+	this->adj[v].push_back(w);
+	this->adj[w].push_back(v);
 }
 
 void Graph::BFS(int s) {
@@ -28,7 +30,7 @@ void Graph::BFS(int s) {
 		frontier.pop();
 		visited[current] = true;
 		std::cout << "level " << level << ": " << current << " adjacent edges: ";
-		for (std::list<int>::const_iterator it = adj[current].begin(), end = adj[current].end(); it != end; it++) {
+		for (std::list<int>::const_iterator it = this->adj[current].begin(), end = this->adj[current].end(); it != end; it++) {
 			if (!visited[*it]) {
 				std::cout << *it << " ";
 				visited[*it] = true;
@@ -43,14 +45,54 @@ void Graph::BFS(int s) {
 			lastElInLevel = frontier.back();
 		}
 	}
+}
 
+void Graph::PBFS(int s) {
+	int parents[this->V];
+	memset(&parents, 0xFF, sizeof(parents));
 
+	std::vector<int> frontier;
+	std::vector<int> new_frontier;	
+
+	parents[s] = s;
+	frontier.push_back(s);
+
+	int level = 0;
+
+	while (!frontier.empty()) {
+		cilk_for (std::vector<int>::iterator f = frontier.begin(), end = frontier.end(); f != end; f++) {
+			std::cout << "Level " << level << ". Neighbors for " << *f << ": ";
+			for (std::list<int>::iterator it = this->adj[*f].begin(), end = this->adj[*f].end(); it != end; it++) {
+				if (parents[*it] == -1) {
+					parents[*it] = *f;
+					std::cout << *it << " ";
+				}
+			}
+			std::cout << std::endl;
+		}
+
+		cilk_for (std::vector<int>::iterator f = frontier.begin(), end = frontier.end(); f != end; f++) {
+			for (std::list<int>::const_iterator it = this->adj[*f].begin(), end = this->adj[*f].end(); it != end; it++) {
+				if (parents[*it] == *f) {
+					new_frontier.push_back(*it);
+				}
+			}
+		}
+
+		frontier.assign(new_frontier.begin(), new_frontier.end());
+		new_frontier.clear();
+		level++;
+	}
 }
 
 int main() {
-	Graph g(5);
-	g.addEdge(1, 2);
-	g.addEdge(1, 3);
-	g.addEdge(2, 4);
-	g.BFS(1);
+	Graph g(100);
+	for (int i = 0; i < 100; i++) {
+		for (int j = i + 1; j < 100; j++) {
+			g.addEdge(i, j);
+		}
+	}
+
+	std::cout << "Passed" << std::endl;
+	g.PBFS(1);
 }

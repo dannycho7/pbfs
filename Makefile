@@ -1,4 +1,4 @@
 all:
-	g++ -o ./bfs graph.cpp
+	icc -o ./bfs graph.cpp
 clean:
 	rm ./bfs
