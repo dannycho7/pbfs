@@ -3,6 +3,8 @@
 #include <queue>
 #include <algorithm>
 #include <cilk/cilk.h>
+#include <cilk/reducer.h>
+#include <cilk/reducer_vector.h>
 #include "graph.h"
 
 Graph::Graph(int V) {
@@ -52,12 +54,12 @@ void Graph::PBFS(int s) {
 	memset(&parents, 0xFF, sizeof(parents));
 
 	std::vector<int> frontier;
-	std::vector<int> new_frontier;	
+	cilk::reducer< cilk::op_vector<int> > new_frontier;	
 
 	parents[s] = s;
 	frontier.push_back(s);
 
-	int level = 0;
+	int level = 1;
 
 	while (!frontier.empty()) {
 		cilk_for (std::vector<int>::iterator f = frontier.begin(), end = frontier.end(); f != end; f++) {
@@ -74,24 +76,28 @@ void Graph::PBFS(int s) {
 		cilk_for (std::vector<int>::iterator f = frontier.begin(), end = frontier.end(); f != end; f++) {
 			for (std::list<int>::const_iterator it = this->adj[*f].begin(), end = this->adj[*f].end(); it != end; it++) {
 				if (parents[*it] == *f) {
-					new_frontier.push_back(*it);
+					new_frontier->push_back(*it);
 				}
 			}
 		}
 
-		frontier.assign(new_frontier.begin(), new_frontier.end());
-		new_frontier.clear();
+		frontier.clear();
+		new_frontier.move_out(frontier);
 		level++;
 	}
 }
 
 int main() {
+	/*
 	Graph g(100);
 	for (int i = 0; i < 100; i++) {
 		for (int j = i + 1; j < 100; j++) {
 			g.addEdge(i, j);
 		}
-	}
+	}*/
+	Graph g(4);
+	g.addEdge(0, 1);
+	g.addEdge(0, 2);
 
 	std::cout << "Passed" << std::endl;
 	g.PBFS(1);
