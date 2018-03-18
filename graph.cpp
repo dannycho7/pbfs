@@ -135,5 +135,8 @@ int main(int argc, char **argv) {
 	Graph g(atoi(argv[1]));
 	readEdges(argv[2], g);
 
+	double t1 = example_get_time();
 	g.PBFS(1);
+	double t2 = example_get_time();
+	std::cout << "BFS time: " << t2 - t1 << "ms" <<  std::endl;
 }
