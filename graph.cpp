@@ -10,6 +10,7 @@
 #include <cilk/reducer.h>
 #include <cilk/reducer_vector.h>
 #include "graph.h"
+#include "example_util_gettime.h"
 
 Graph::Graph(int V) {
 	this->V = V;
@@ -58,7 +59,7 @@ void Graph::PBFS(int s) {
 	memset(&parents, 0xFF, sizeof(parents));
 
 	std::vector<int> frontier;
-	cilk::reducer< cilk::op_vector<int> > new_frontier;	
+	cilk::reducer< cilk::op_vector<int> > new_frontier;
 
 	parents[s] = s;
 	frontier.push_back(s);
@@ -108,7 +109,7 @@ void readEdges(std::string filename, Graph &g) {
 		std::stringstream orderedTuple;
 		int a, b;
 		iss >> a >> b;
-		
+
 		if (a == b) continue;
 
 		int smaller = std::min(a, b);
@@ -129,7 +130,7 @@ int main(int argc, char **argv) {
 	if (argc < 3) {
 		std::cerr << "Correct Usage: ./bfs <num_vertices> <edges_filename>" << std::endl;
 		exit(1);
-	}	
+	}
 
 	Graph g(atoi(argv[1]));
 	readEdges(argv[2], g);
