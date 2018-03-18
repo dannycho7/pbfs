@@ -1,7 +1,11 @@
-#include <iostream>
-#include <cstring>
-#include <queue>
 #include <algorithm>
+#include <cstring>
+#include <fstream>
+#include <iostream>
+#include <queue>
+#include <sstream>
+#include <string>
+#include <set>
 #include <cilk/cilk.h>
 #include <cilk/reducer.h>
 #include <cilk/reducer_vector.h>
@@ -87,18 +91,48 @@ void Graph::PBFS(int s) {
 	}
 }
 
-int main() {
-	/*
-	Graph g(100);
-	for (int i = 0; i < 100; i++) {
-		for (int j = i + 1; j < 100; j++) {
-			g.addEdge(i, j);
-		}
-	}*/
-	Graph g(4);
-	g.addEdge(0, 1);
-	g.addEdge(0, 2);
+void readEdges(std::string filename, Graph &g) {
+	std::ifstream edgesFile;
+	edgesFile.open(filename.c_str());
+	std::set <std::string> edgeTupleSet;
 
-	std::cout << "Passed" << std::endl;
+	if (!edgesFile) {
+		std::cerr << "Unable to open " << filename << std::endl;
+		exit(1);
+	}
+
+	std::string edgeTuple;
+
+	while (std::getline(edgesFile, edgeTuple)) {
+		std::istringstream iss(edgeTuple);
+		std::stringstream orderedTuple;
+		int a, b;
+		iss >> a >> b;
+		
+		if (a == b) continue;
+
+		int smaller = std::min(a, b);
+		int bigger = std::max(a ,b);
+
+		orderedTuple << smaller << " " << bigger;
+		if (edgeTupleSet.find(orderedTuple.str()) == edgeTupleSet.end()) {
+			edgeTupleSet.insert(orderedTuple.str());
+			std::cout << "Adding " << orderedTuple.str() << std::endl;
+			g.addEdge(a, b);
+		}
+	}
+
+	edgesFile.close();
+}
+
+int main(int argc, char **argv) {
+	if (argc < 3) {
+		std::cerr << "Correct Usage: ./bfs <num_vertices> <edges_filename>" << std::endl;
+		exit(1);
+	}	
+
+	Graph g(atoi(argv[1]));
+	readEdges(argv[2], g);
+
 	g.PBFS(1);
 }
