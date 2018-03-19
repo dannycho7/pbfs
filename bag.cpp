@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+#include <stack>
 
 struct Node {
 	int vertex;
@@ -25,8 +26,23 @@ public:
 
 	~Pennant() {
 		if (this->root != NULL) {
-			std::cerr << "Implement Destructor" << std::endl;
-			exit(1);
+			std::stack<Node *> nodes;
+		
+			nodes.push(this->root);
+			while (nodes.size() > 0) {
+				Node *current = nodes.top();
+				nodes.pop();
+
+				if (current->left != NULL) {
+					nodes.push(current->left);
+				}
+
+				if (current->right != NULL) {
+					nodes.push(current->right);
+				}
+
+				delete current;
+			}
 		}
 	}
 
@@ -107,6 +123,14 @@ public:
 		this->largest_nonempty_index = -1;
 	}
 	
+	~Bag() {
+		for (int i = 0; i <= this->largest_nonempty_index; i++) {
+			delete this->backbone[i];
+		}
+
+		delete[] this->backbone;
+	}
+
 	void insert_vertex(int x) {
 		Node* vertex = new Node(x);
 		Pennant *vertices = new Pennant(vertex);
@@ -140,7 +164,7 @@ public:
 		Pennant *first_elem = this->backbone[0];
 		this->backbone[0] = NULL;
 		
-		for (int i = 1; i < this->largest_nonempty_index; i++) {
+		for (int i = 1; i <= this->largest_nonempty_index; i++) {
 			if (this->backbone[i] != NULL) {
 				bag2->backbone[i - 1] = this->backbone[i]->p_split();
 				this->backbone[i - 1] = this->backbone[i];
@@ -159,8 +183,7 @@ public:
 	}
 
 	void clear() {
-		for (int i = 0; i < this->r; i++) {
-			delete this->backbone[i];
+		for (int i = 0; i < this->largest_nonempty_index; i++) {
 			this->backbone[i] = NULL;
 		}
 	}
@@ -175,7 +198,7 @@ public:
 
 	int size() {
 		int sum = 0;
-		for (int i = 0; i < this->largest_nonempty_index; i++) {
+		for (int i = 0; i <= this->largest_nonempty_index; i++) {
 			if (this->backbone[i] != NULL) {
 				sum += pow(2, i);
 			}

@@ -1,6 +1,7 @@
 #include <cstring>
 #include <iostream>
 #include <queue>
+#include <stack>
 #include <cilk/cilk.h>
 #include <cilk/reducer.h>
 #include <cilk/reducer_vector.h>
@@ -8,7 +9,7 @@
 #include "bag.cpp"
 #include "bag_reducer.cpp"
 
-#define COARSENESS 30
+#define COARSENESS 7
 
 Graph::Graph(int V) {
 	this->V = V;
@@ -97,8 +98,30 @@ void Graph::processLevelBag(Bag *&frontier, Bag_reducer &new_frontier, int *visi
 		processLevelBag(frontier, new_frontier, visited);
 		cilk_sync;
 	} else {
-		for (std::vector<int>::iterator f = frontier.begin(), end = frontier.end(); f != end; f++) {
-		
+		std::stack<Node *> nodes;
+
+		for (int i = 0; i <= frontier->largest_nonempty_index; i++) {
+			if (frontier->backbone[i] != NULL) {
+				nodes.push(frontier->backbone[i]->root);
+				while (nodes.size() > 0) {
+					Node *current = nodes.top();
+					nodes.pop();
+
+					if (current->left != NULL) {
+						nodes.push(current->left);
+					}
+
+					if (current->right != NULL) {
+						nodes.push(current->right);
+					}
+
+					this->adj[current->vertex];
+
+					for (std::list<int>::iterator it = this->adj[current->vertex].begin(), end = this->adj[current->vertex].end(); it != end; it++) {
+						new_frontier.insert_vertex(*it);
+					}
+				}
+			}
 		}
 	}
 }
@@ -109,7 +132,7 @@ void Graph::BAGPBFS(int s) {
 
 	Bag* frontier = new Bag();
 	Bag_reducer new_frontier;
-
+	Bag * buf;
 	visited[s] = s;
 	frontier->insert_vertex(s);
 
@@ -120,12 +143,16 @@ void Graph::BAGPBFS(int s) {
 
 		this->processLevelBag(frontier, new_frontier, visited);
 
+		std::cout << "Finish process level" << std::endl;
+
+		frontier->print();
 		delete frontier;
 		frontier = new_frontier.get_value();
-		new_frontier.clear();
+
+		frontier->print();
+		buf = new Bag();
+		new_frontier.set_value(buf);
 		level++;
 	}
-	
-	Bag* front = new_frontier.get_value();
-	front->print();
+
 }

@@ -39,6 +39,10 @@ public:
 		return imp_.view().empty();
 	}
 
+	void set_value(Bag *y) {
+		this->imp_();
+	}
+
 private:
 	cilk::reducer<Monoid> imp_;
 };
