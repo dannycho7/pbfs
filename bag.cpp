@@ -1,7 +1,9 @@
+#ifndef BAG
+#define BAG
+
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
-#include "graph.h"
 
 struct Node {
 	int vertex;
@@ -92,13 +94,17 @@ public:
 class Bag {
 public:
 	Bag() {
-		this->backbone = new Pennant*[20]();
-		this->r = 20;
+		this->init(20);
 	}
 
 	Bag(int r) {
+		this->init(r);
+	}
+
+	void init(int r) {
 		this->backbone = new Pennant*[r]();
 		this->r = r;
+		this->largest_nonempty_index = -1;
 	}
 	
 	void insert_vertex(int x) {
@@ -115,10 +121,11 @@ public:
 			this->backbone[i] = NULL;
 			i++;
 		}
-
-		std::cout << "Value of i: " << i << std::endl;		
 	
 		this->backbone[i] = vertices;
+		if (i > largest_nonempty_index) {
+			this->largest_nonempty_index = i;
+		}
 	}
 
 	void merge(Bag* y) {
@@ -132,8 +139,8 @@ public:
 		Bag *bag2 = new Bag(this->r);
 		Pennant *first_elem = this->backbone[0];
 		this->backbone[0] = NULL;
-			
-		for (int i = 1; i < this->r; i++) {
+		
+		for (int i = 1; i < this->largest_nonempty_index; i++) {
 			if (this->backbone[i] != NULL) {
 				bag2->backbone[i - 1] = this->backbone[i]->p_split();
 				this->backbone[i - 1] = this->backbone[i];
@@ -141,10 +148,21 @@ public:
 			}
 		}
 
+		if (this->largest_nonempty_index != 0) {
+			this->largest_nonempty_index = this->largest_nonempty_index - 1;
+		}
+
 		if (first_elem != NULL) {
 			this->insert(first_elem);
 		}
 		return bag2;
+	}
+
+	void clear() {
+		for (int i = 0; i < this->r; i++) {
+			delete this->backbone[i];
+			this->backbone[i] = NULL;
+		}
 	}
 
 	void print() {
@@ -155,7 +173,25 @@ public:
 		std::cout << "}" << std::endl;
 	}
 
+	int size() {
+		int sum = 0;
+		for (int i = 0; i < this->largest_nonempty_index; i++) {
+			if (this->backbone[i] != NULL) {
+				sum += pow(2, i);
+			}
+		}
+
+		return sum;
+	}
+
+	bool empty() {
+		return (this->largest_nonempty_index < 0);
+	}
+
 	Pennant** backbone;
+	int largest_nonempty_index;
 private:
 	int r;
 };
+
+#endif

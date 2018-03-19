@@ -1,3 +1,8 @@
+#ifndef BAG_REDUCER
+#define BAG_REDUCER
+
+#include "bag.cpp"
+#include <cilk/cilk.h>
 #include <cilk/reducer.h>
 
 // Make the bag a reducer hyperobject
@@ -26,6 +31,16 @@ public:
 		imp_.view().insert_vertex(x);
 	}
 
+	void clear() {
+		imp_.view().clear();
+	}
+
+	bool empty() {
+		return imp_.view().empty();
+	}
+
 private:
 	cilk::reducer<Monoid> imp_;
 };
+
+#endif

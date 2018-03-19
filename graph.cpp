@@ -8,6 +8,8 @@
 #include "bag.cpp"
 #include "bag_reducer.cpp"
 
+#define COARSENESS 30
+
 Graph::Graph(int V) {
 	this->V = V;
 	this->adj = new std::list<int>[this->V];
@@ -88,34 +90,42 @@ void Graph::PBFS(int s) {
 	}
 }
 
-
-void Graph::BAGPBFS(int s) {
-	/*Bag x(300);
-	x.insert_vertex(2);
-	x.insert_vertex(3);
-	x.insert_vertex(4);
-	x.insert_vertex(5);
-	x.insert_vertex(1);
-	Bag y(300);
-	y.insert_vertex(1);
-	x.merge(&y);
-	std::cout << "Merged x and y" << std::endl;
-	x.insert_vertex(1);	
-	Bag *z = x.split();
-	std::cout << "Split x" << std::endl;	
-	/// x.insert_vertex(1);
-	x.print();
-	y.print();
-	z->print();*/
-
-	Bag_reducer frontier;
-
-	cilk_for (int i = 0; i < 30; i++) {
-		for (int j = 0; j < 40; j++) {
-			frontier.insert_vertex(i * j);
+void Graph::processLevelBag(Bag *&frontier, Bag_reducer &new_frontier, int *visited) {
+	if (frontier->size() > COARSENESS) {
+		Bag* y = frontier->split();
+		cilk_spawn processLevelBag(y, new_frontier, visited);
+		processLevelBag(frontier, new_frontier, visited);
+		cilk_sync;
+	} else {
+		for (std::vector<int>::iterator f = frontier.begin(), end = frontier.end(); f != end; f++) {
+		
 		}
 	}
+}
 
-	Bag* front = frontier.get_value();
+void Graph::BAGPBFS(int s) {
+	int *visited = new int[this->V];
+	memset(visited, 0, sizeof(visited));
+
+	Bag* frontier = new Bag();
+	Bag_reducer new_frontier;
+
+	visited[s] = s;
+	frontier->insert_vertex(s);
+
+	int level = 1;
+
+	while (!frontier->empty()) {
+		std::cout << "Start of loop" << std::endl;
+
+		this->processLevelBag(frontier, new_frontier, visited);
+
+		delete frontier;
+		frontier = new_frontier.get_value();
+		new_frontier.clear();
+		level++;
+	}
+	
+	Bag* front = new_frontier.get_value();
 	front->print();
 }
