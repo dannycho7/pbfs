@@ -9,6 +9,7 @@ public:
 	void addEdge(int v, int w);
 	void BFS(int s);
 	void PBFS(int s);
+	void BAGPBFS(int s);
 private:
 	std::list<int> *adj;
 	int V;
