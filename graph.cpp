@@ -6,6 +6,7 @@
 #include <cilk/reducer_vector.h>
 #include "graph.h"
 #include "bag.cpp"
+#include "bag_reducer.cpp"
 
 Graph::Graph(int V) {
 	this->V = V;
@@ -89,7 +90,7 @@ void Graph::PBFS(int s) {
 
 
 void Graph::BAGPBFS(int s) {
-	Bag x(300);
+	/*Bag x(300);
 	x.insert_vertex(2);
 	x.insert_vertex(3);
 	x.insert_vertex(4);
@@ -105,5 +106,16 @@ void Graph::BAGPBFS(int s) {
 	/// x.insert_vertex(1);
 	x.print();
 	y.print();
-	z->print();
+	z->print();*/
+
+	Bag_reducer frontier;
+
+	cilk_for (int i = 0; i < 30; i++) {
+		for (int j = 0; j < 40; j++) {
+			frontier.insert_vertex(i * j);
+		}
+	}
+
+	Bag* front = frontier.get_value();
+	front->print();
 }

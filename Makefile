@@ -7,7 +7,7 @@ bag.o: bag.cpp
 bfs.o: bfs.cpp
 	g++ -o ./bfs.o -c ./bfs.cpp
 
-graph.o: bag.cpp graph.cpp graph.h
+graph.o: bag_reducer.cpp bag.cpp graph.cpp graph.h
 	icc -o ./graph.o -c ./graph.cpp
 
 clean:

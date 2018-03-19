@@ -91,6 +91,11 @@ public:
 
 class Bag {
 public:
+	Bag() {
+		this->backbone = new Pennant*[20]();
+		this->r = 20;
+	}
+
 	Bag(int r) {
 		this->backbone = new Pennant*[r]();
 		this->r = r;
