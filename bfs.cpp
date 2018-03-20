@@ -39,16 +39,30 @@ void readEdges(std::string filename, Graph &g) {
 }
 
 int main(int argc, char **argv) {
-	if (argc < 3) {
-		std::cerr << "Correct Usage: ./bfs <num_vertices> <edges_filename>" << std::endl;
+	if (argc < 4) {
+		std::cerr << "Correct Usage: ./bfs <algorithm_choice> <num_vertices> <edges_filename>" << std::endl;
 		exit(1);
 	}
 
-	Graph g(atoi(argv[1]));
-	readEdges(argv[2], g);
+	int algorithm_choice = atoi(argv[1]);
+
+	if (algorithm_choice < 0 || algorithm_choice > 3) {
+		std::cerr << "algorithm_choice must be in { 0, 1, 2 }" << std::endl;
+		exit(1);
+	}
+
+	Graph g(atoi(argv[2]));
+	readEdges(argv[3], g);
 
 	double t1 = example_get_time();
-	g.BAGPBFS(1);
+	switch (algorithm_choice) {
+		case 0: g.BFS(1);
+				break;
+		case 1: g.PBFS(1);
+				break;
+		case 2: g.BAGPBFS(1);
+				break;
+	}
 	double t2 = example_get_time();
 	std::cout << "BFS time: " << t2 - t1 << "ms" <<  std::endl;
 }
