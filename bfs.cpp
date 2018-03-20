@@ -1,45 +1,29 @@
 #include <algorithm>
 #include <cstring>
-#include <fstream>
 #include <iostream>
 #include <queue>
-#include <sstream>
+#include <stdio.h>
 #include <string>
 #include <set>
 #include "graph.h"
 #include "example_util_gettime.h"
 
-void readEdges(std::string filename, Graph &g) {
-	std::ifstream edgesFile;
-	edgesFile.open(filename.c_str());
+void readEdges(Graph &g) {
 	std::set <std::string> edgeTupleSet;
-
-	if (!edgesFile) {
-		std::cerr << "Unable to open " << filename << std::endl;
-		exit(1);
-	}
-
 	std::string edgeTuple;
 
-	while (std::getline(edgesFile, edgeTuple)) {
-		if (edgeTupleSet.find(edgeTuple) == edgeTupleSet.end()) {
-			std::istringstream iss(edgeTuple);
-			int a, b;
-			iss >> a >> b;
+	int a, b;
+	int numEdges = 0;
 
-			if (a == b) continue;
-
-			edgeTupleSet.insert(edgeTuple);
-			// std::cout << "Adding " << edgeTuple << std::endl;
-			g.addEdge(a, b);
-		}
+	while (scanf("%i %i", &a, &b) == 2) {
+		if (a == b) continue;
+		g.addEdge(a, b);
+		numEdges++;
 	}
-
-	edgesFile.close();
 }
 
 int main(int argc, char **argv) {
-	if (argc < 4) {
+	if (argc < 3) {
 		std::cerr << "Correct Usage: ./bfs <algorithm_choice> <num_vertices> <edges_filename>" << std::endl;
 		exit(1);
 	}
@@ -52,7 +36,7 @@ int main(int argc, char **argv) {
 	}
 
 	Graph g(atoi(argv[2]));
-	readEdges(argv[3], g);
+	readEdges(g);
 
 	double t1 = example_get_time();
 	switch (algorithm_choice) {
