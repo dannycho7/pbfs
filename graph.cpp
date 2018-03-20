@@ -9,7 +9,7 @@
 #include "bag.h"
 #include "bag_reducer.h"
 
-#define COARSENESS 7
+#define COARSENESS 100
 
 Graph::Graph(int V) {
 	this->V = V;
@@ -23,7 +23,7 @@ void Graph::addEdge(int v, int w) {
 
 void Graph::BFS(int s) {
 	int levels[this->V];
-	memset(levels, 0xFF, this->V * sizeof(int));
+	memset(&levels, 0xFF, this->V * sizeof(int));
 	std::queue<int> frontier;
 
 	int level = 0;
@@ -57,7 +57,8 @@ void Graph::BFS(int s) {
 void Graph::PBFS(int s) {
 	int parents[this->V];
 	int levels[this->V];
-	memset(&parents, 0xFF, sizeof(parents));
+	memset(&parents, 0xFF, sizeof(int) * this->V);
+	memset(&levels, 0xFF, sizeof(int) * this->V);
 
 	std::vector<int> frontier;
 	cilk::reducer< cilk::op_vector<int> > new_frontier;
@@ -95,7 +96,7 @@ void Graph::PBFS(int s) {
 	}
 }
 
-void Graph::processLevelBag(Bag *&frontier, Bag_reducer &new_frontier, int *levels, int level) {
+void Graph::processLevelBag(Bag *&frontier, Bag_reducer &new_frontier, int levels[], int level) {
 	if (frontier->size() > COARSENESS) {
 		Bag* y = frontier->split();
 		cilk_spawn processLevelBag(y, new_frontier, levels, level);
@@ -132,9 +133,9 @@ void Graph::processLevelBag(Bag *&frontier, Bag_reducer &new_frontier, int *leve
 }
 
 void Graph::BAGPBFS(int s) {
-	int *levels = new int[this->V];
+	int levels[this->V];
 	int *x;
-	memset(levels, 0xFF, this->V * sizeof(int));
+	memset(&levels, 0xFF, this->V * sizeof(int));
 
 	Bag* frontier = new Bag();
 	Bag * buf;

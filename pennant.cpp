@@ -39,6 +39,10 @@ void Pennant::p_merge(Pennant *&y) {
 }
 
 Pennant* Pennant::p_split() {
+	if (this->root->left == NULL) {
+		return NULL;
+	}
+	
 	Pennant *y = new Pennant(this->root->left);
 	this->root->left = y->root->right;
 	y->root->right = NULL;
