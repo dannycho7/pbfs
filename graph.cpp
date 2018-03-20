@@ -9,7 +9,7 @@
 #include "bag.h"
 #include "bag_reducer.h"
 
-#define COARSENESS 2000
+#define COARSENESS 25
 
 Graph::Graph(int V) {
 	this->V = V;
