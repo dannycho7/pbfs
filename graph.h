@@ -13,7 +13,7 @@ public:
 	void BAGPBFS(int s);
 	void processLevelBag(Bag *&frontier, Bag_reducer &new_frontier, int levels[], int level);
 private:
-	std::list<int> *adj;
+	std::vector<int> *adj;
 	int V;
 };
 

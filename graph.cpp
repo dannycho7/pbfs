@@ -13,7 +13,7 @@
 
 Graph::Graph(int V) {
 	this->V = V;
-	this->adj = new std::list<int>[this->V];
+	this->adj = new std::vector<int>[this->V];
 }
 
 void Graph::addEdge(int v, int w) {
@@ -34,7 +34,7 @@ void Graph::BFS(int s) {
 	while (!frontier.empty()) {
 		int current = frontier.front();
 		frontier.pop();
-		for (std::list<int>::const_iterator it = this->adj[current].begin(), end = this->adj[current].end(); it != end; it++) {
+		for (std::vector<int>::const_iterator it = this->adj[current].begin(), end = this->adj[current].end(); it != end; it++) {
 			if (levels[*it] < 0) {
 				frontier.push(*it);
 				levels[*it] = level + 1;
@@ -69,7 +69,7 @@ void Graph::PBFS(int s) {
 
 	while (!frontier.empty()) {
 		cilk_for (std::vector<int>::iterator f = frontier.begin(), end = frontier.end(); f != end; f++) {
-			for (std::list<int>::iterator it = this->adj[*f].begin(), end = this->adj[*f].end(); it != end; it++) {
+			for (std::vector<int>::iterator it = this->adj[*f].begin(), end = this->adj[*f].end(); it != end; it++) {
 				if (parents[*it] == -1) {
 					parents[*it] = *f;
 				}
@@ -78,7 +78,7 @@ void Graph::PBFS(int s) {
 
 		cilk_for (std::vector<int>::iterator f = frontier.begin(), end = frontier.end(); f != end; f++) {
 			levels[*f] = level;
-			for (std::list<int>::const_iterator it = this->adj[*f].begin(), end = this->adj[*f].end(); it != end; it++) {
+			for (std::vector<int>::const_iterator it = this->adj[*f].begin(), end = this->adj[*f].end(); it != end; it++) {
 				if (parents[*it] == *f) {
 					new_frontier->push_back(*it);
 				}
@@ -119,7 +119,7 @@ void Graph::processLevelBag(Bag *&frontier, Bag_reducer &new_frontier, int level
 						nodes.push(current->right);
 					}
 
-					for (std::list<int>::iterator it = this->adj[current->vertex].begin(), end = this->adj[current->vertex].end(); it != end; it++) {
+					for (std::vector<int>::iterator it = this->adj[current->vertex].begin(), end = this->adj[current->vertex].end(); it != end; it++) {
 						if (levels[*it] < 0) {
 							new_frontier.insert_vertex(*it);
 							levels[*it] = level + 1;
@@ -141,7 +141,6 @@ void Graph::BAGPBFS(int s) {
 	frontier->insert_vertex(s);
 	int level = 0;
 	levels[s] = level;
-
 
 	while (!frontier->empty()) {
 		Bag_reducer new_frontier;
