@@ -9,7 +9,7 @@
 #include "bag.h"
 #include "bag_reducer.h"
 
-#define COARSENESS 100
+#define COARSENESS 2000
 
 Graph::Graph(int V) {
 	this->V = V;
@@ -18,7 +18,6 @@ Graph::Graph(int V) {
 
 void Graph::addEdge(int v, int w) {
 	this->adj[v].push_back(w);
-	this->adj[w].push_back(v);
 }
 
 void Graph::BFS(int s) {

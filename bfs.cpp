@@ -22,20 +22,15 @@ void readEdges(std::string filename, Graph &g) {
 	std::string edgeTuple;
 
 	while (std::getline(edgesFile, edgeTuple)) {
-		std::istringstream iss(edgeTuple);
-		std::stringstream orderedTuple;
-		int a, b;
-		iss >> a >> b;
+		if (edgeTupleSet.find(edgeTuple) == edgeTupleSet.end()) {
+			std::istringstream iss(edgeTuple);
+			int a, b;
+			iss >> a >> b;
 
-		if (a == b) continue;
+			if (a == b) continue;
 
-		int smaller = std::min(a, b);
-		int bigger = std::max(a ,b);
-
-		orderedTuple << smaller << " " << bigger;
-		if (edgeTupleSet.find(orderedTuple.str()) == edgeTupleSet.end()) {
-			edgeTupleSet.insert(orderedTuple.str());
-			// std::cout << "Adding " << orderedTuple.str() << std::endl;
+			edgeTupleSet.insert(edgeTuple);
+			// std::cout << "Adding " << edgeTuple << std::endl;
 			g.addEdge(a, b);
 		}
 	}
