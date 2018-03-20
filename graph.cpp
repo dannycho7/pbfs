@@ -6,8 +6,8 @@
 #include <cilk/reducer.h>
 #include <cilk/reducer_vector.h>
 #include "graph.h"
-#include "bag.cpp"
-#include "bag_reducer.cpp"
+#include "bag.h"
+#include "bag_reducer.h"
 
 #define COARSENESS 7
 
@@ -91,11 +91,11 @@ void Graph::PBFS(int s) {
 	}
 }
 
-void Graph::processLevelBag(Bag *&frontier, Bag_reducer &new_frontier, int *visited) {
+void Graph::processLevelBag(Bag *&frontier, Bag_reducer &new_frontier, int *levels, int level) {
 	if (frontier->size() > COARSENESS) {
 		Bag* y = frontier->split();
-		cilk_spawn processLevelBag(y, new_frontier, visited);
-		processLevelBag(frontier, new_frontier, visited);
+		cilk_spawn processLevelBag(y, new_frontier, levels, level);
+		processLevelBag(frontier, new_frontier, levels, level);
 		cilk_sync;
 	} else {
 		std::stack<Node *> nodes;
@@ -115,10 +115,11 @@ void Graph::processLevelBag(Bag *&frontier, Bag_reducer &new_frontier, int *visi
 						nodes.push(current->right);
 					}
 
-					this->adj[current->vertex];
-
 					for (std::list<int>::iterator it = this->adj[current->vertex].begin(), end = this->adj[current->vertex].end(); it != end; it++) {
-						new_frontier.insert_vertex(*it);
+						if (levels[*it] < 0) {
+							new_frontier.insert_vertex(*it);
+							levels[*it] = level + 1;
+						}
 					}
 				}
 			}
@@ -127,32 +128,29 @@ void Graph::processLevelBag(Bag *&frontier, Bag_reducer &new_frontier, int *visi
 }
 
 void Graph::BAGPBFS(int s) {
-	int *visited = new int[this->V];
-	memset(visited, 0, sizeof(visited));
+	int *levels = new int[this->V];
+	int *x;
+	memset(levels, 0xFF, this->V * sizeof(int));
 
 	Bag* frontier = new Bag();
-	Bag_reducer new_frontier;
 	Bag * buf;
-	visited[s] = s;
 	frontier->insert_vertex(s);
+	int level = 0;
+	levels[s] = level;
 
-	int level = 1;
 
 	while (!frontier->empty()) {
-		std::cout << "Start of loop" << std::endl;
+		Bag_reducer new_frontier;
 
-		this->processLevelBag(frontier, new_frontier, visited);
+		this->processLevelBag(frontier, new_frontier, levels, level);
 
-		std::cout << "Finish process level" << std::endl;
+		frontier->clear();
+		frontier->merge(new_frontier.get_value());
 
-		frontier->print();
-		delete frontier;
-		frontier = new_frontier.get_value();
-
-		frontier->print();
-		buf = new Bag();
-		new_frontier.set_value(buf);
 		level++;
 	}
 
+	for (int i = 0; i < this->V; i++) {
+		std::cout << i << ": " << levels[i] << std::endl;
+	}
 }

@@ -35,7 +35,7 @@ void readEdges(std::string filename, Graph &g) {
 		orderedTuple << smaller << " " << bigger;
 		if (edgeTupleSet.find(orderedTuple.str()) == edgeTupleSet.end()) {
 			edgeTupleSet.insert(orderedTuple.str());
-			std::cout << "Adding " << orderedTuple.str() << std::endl;
+			// std::cout << "Adding " << orderedTuple.str() << std::endl;
 			g.addEdge(a, b);
 		}
 	}

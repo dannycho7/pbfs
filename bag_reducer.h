@@ -1,7 +1,7 @@
-#ifndef BAG_REDUCER
-#define BAG_REDUCER
+#ifndef BAG_REDUCER_H
+#define BAG_REDUCER_H
 
-#include "bag.cpp"
+#include "bag.h"
 #include <cilk/cilk.h>
 #include <cilk/reducer.h>
 
@@ -17,7 +17,7 @@ public:
 
 	Bag_reducer() {
 		this->imp_();
-	}
+	} 
 
 	Bag* get_value() {
 		return &this->imp_.view();
@@ -40,7 +40,7 @@ public:
 	}
 
 	void set_value(Bag *y) {
-		this->imp_();
+		this->imp_.set_value(*y);
 	}
 
 private:
