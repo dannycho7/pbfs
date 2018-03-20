@@ -18,6 +18,7 @@ Graph::Graph(int V) {
 
 void Graph::addEdge(int v, int w) {
 	this->adj[v].push_back(w);
+	this->adj[w].push_back(v);
 }
 
 void Graph::BFS(int s) {
